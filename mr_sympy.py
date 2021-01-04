@@ -84,13 +84,16 @@ def MatrixExp6(se3mat):
                   [  0,   0,    0,   1]])
     """
     omgtheta = so3ToVec(se3mat[0: 3, 0: 3])
-    theta = AxisAng3(omgtheta)[1]
-    omgmat = se3mat[0: 3, 0: 3] / theta
-    R = MatrixExp3(se3mat[0: 3, 0: 3])
-    p = (eye(3) * theta + (1 - cos(theta)) * omgmat + (theta - sin(theta)) \
+    if omgtheta.norm() == 0:
+        return (eye(3).row_join(se3mat[0: 3, 3])).col_join(Matrix([[0, 0, 0, 1]]))
+    else:
+        theta = AxisAng3(omgtheta)[1]
+        omgmat = se3mat[0: 3, 0: 3] / theta
+        R = MatrixExp3(se3mat[0: 3, 0: 3])
+        p = (eye(3) * theta + (1 - cos(theta)) * omgmat + (theta - sin(theta)) \
                 * omgmat*omgmat) * se3mat[0: 3, 3] / theta
-    T = (R.row_join(p)).col_join(Matrix(1,4,[0,0,0,1]))
-    return T
+        T = (R.row_join(p)).col_join(Matrix(1,4,[0,0,0,1]))
+        return T
 
 
 # Chapter 4 Forward Kinematics
